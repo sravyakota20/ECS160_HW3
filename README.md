@@ -8,4 +8,5 @@ This project implements the **Moderation Microservice** for ECS160-HW3. It proce
 This repository consists of:
 - **Moderation Service** - REST API service that filters posts based on banned words.
 - **JUnit Tests** - Validates moderation logic.
+- The parent package is set to **com.ecs160.hw2**
 
