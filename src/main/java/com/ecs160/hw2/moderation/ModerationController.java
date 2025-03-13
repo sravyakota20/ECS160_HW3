@@ -15,13 +15,25 @@ public class ModerationController {
             "illegal", "fraud", "scam", "exploit", "dox", "swatting", "hack", "crypto", "bots"
     );
 
-    private final RestTemplate restTemplate = new RestTemplate();
-    // URL for the Hashtagging service – make sure this matches the port of your hashtagging microservice.
-    private final String hashtagServiceUrl = "http://localhost:30001/hashtag";
+    private final String getHashtagServiceUrl() {
+        String port = System.getProperties().getProperty("server.port", "30001");
+        return  "http://localhost:" + port + "/hashtag";
+    }
 
+    // Default RestTemplate instance used in production
+    private RestTemplate restTemplate = new RestTemplate();
+
+    // Setter for testing purposes
+    public void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    // URL for the Hashtagging service – make sure this matches the port of your hashtagging microservice.
+    // private final String hashtagServiceUrl = "http://localhost:30001/hashtag";
     @PostMapping("/moderate")
     public ResponseEntity<String> moderate(@RequestBody PostRequest request) {
         String content = request.getPostContent();
+        System.out.println("Received request: " + content);
         // Moderation check: if any banned word exists, return [DELETED]
         for (String banned : bannedWords) {
             if (content.toLowerCase().contains(banned)) {
@@ -31,7 +43,7 @@ public class ModerationController {
         // Moderation passed. Call the hashtagging microservice.
         try {
             ResponseEntity<HashtagResponse> response = restTemplate.postForEntity(
-                    hashtagServiceUrl, request, HashtagResponse.class
+                    getHashtagServiceUrl(), request, HashtagResponse.class
             );
             if (response.getBody() != null && response.getBody().getHashtag() != null) {
                 // Append the generated hashtag to the post content.
